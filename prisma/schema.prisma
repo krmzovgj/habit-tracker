@@ -14,6 +14,8 @@ model User {
   email     String  @unique
   password  String
   habits    Habit[]
+  reminders Reminder[]
+  notifications Notification[]
 }
 
 model Habit {
@@ -23,8 +25,8 @@ model Habit {
   user        User       @relation(fields: [userId], references: [id])
   frequency   Frequency  @default(DAILY)
   streakCount Int        @default(0)
-  Reminder    Reminder[]
-  HabitLog    HabitLog[]
+  reminders    Reminder[]
+  habitLogs    HabitLog[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
@@ -41,8 +43,19 @@ model Reminder {
   id      String  @id @default(cuid())
   time    String
   message String?
+  userId Int
+  user User @relation(fields: [userId], references: [id])
   habitId String
   habit   Habit   @relation(fields: [habitId], references: [id])
+}
+
+model Notification {
+  id String @id @default(cuid())
+  message String
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
 }
 
 enum Frequency {
