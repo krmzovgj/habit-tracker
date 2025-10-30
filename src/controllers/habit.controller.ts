@@ -44,3 +44,22 @@ export const getHabits = async (req: HabitRequest, res: Response) => {
         }
     }
 };
+
+// @desc Get habit by id
+// @route GET /:id
+
+export const getHabitById = async (req: Request, res: Response) => {
+    const habitId = req.params.id;
+
+    try {
+        const habit = await habitService.getHabitById(habitId);
+
+        res.status(200).json({habit})
+    } catch (error: any) {
+        if (error.message) {
+            return res.status(error.status).json({
+                message: error.message,
+            });
+        }
+    }
+};

@@ -1,6 +1,6 @@
 import { Frequency } from "@prisma/client";
 import { prisma } from "../prisma";
-import { badRequest } from "../utils/api-error";
+import { badRequest, notFound } from "../utils/api-error";
 import { isSameDay } from "date-fns";
 
 // @return Created habit object
@@ -52,27 +52,59 @@ export const getHabits = async (userId: number) => {
         },
     });
 
-    const today = new Date()
+    const today = new Date();
 
     const habits = allHabits.map((habit) => {
-        const lastLog = habit.HabitLog[0]
+        const lastLog = habit.HabitLog[0];
         return {
             id: habit.id,
             title: habit.title,
             frequency: habit.frequency,
             streakCount: habit.streakCount,
             lastCompletedDate: lastLog?.date || null,
-            completedToday: lastLog ? isSameDay(new Date(lastLog.date), today) : false
-        }
+            completedToday: lastLog
+                ? isSameDay(new Date(lastLog.date), today)
+                : false,
+        };
     });
 
-    return habits
+    return habits;
 };
 
 // @return Habit object by id
 
 export const getHabitById = async (habitId: string) => {
-    if(!habitId) {
-        throw badRequest("Habit id is required")
+    if (!habitId) {
+        throw badRequest("Habit id is required");
     }
-}
+
+    const habit = await prisma.habit.findUnique({
+        where: {
+            id: habitId,
+        },
+        include: {
+            HabitLog: {
+                orderBy: { date: "desc" },
+                take: 1,
+            },
+        },
+    });
+
+    if (!habit) {
+        throw notFound("Habit not found");
+    }
+
+    const today = new Date();
+    const lastLog = habit.HabitLog[0];
+    
+    return {
+        id: habit.id,
+        title: habit.title,
+        frequency: habit.frequency,
+        streakCount: habit.streakCount,
+        lastCompletedDate: lastLog?.date || null,
+        completedToday: lastLog
+            ? isSameDay(new Date(lastLog.date), today)
+            : false,
+    };
+};

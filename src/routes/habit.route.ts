@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.post("/", verifyToken, habitController.createHabit)
 router.get("/", verifyToken, habitController.getHabits);
+router.get("/:id", verifyToken, habitController.getHabitById)
 
 export default router;
