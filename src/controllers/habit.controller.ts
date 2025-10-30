@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import * as habitService from "../services/habit.services";
 
 interface HabitRequest extends Request {
@@ -54,7 +54,7 @@ export const getHabitById = async (req: Request, res: Response) => {
     try {
         const habit = await habitService.getHabitById(habitId);
 
-        res.status(200).json({habit})
+        res.status(200).json(habit);
     } catch (error: any) {
         if (error.message) {
             return res.status(error.status).json({
@@ -63,3 +63,42 @@ export const getHabitById = async (req: Request, res: Response) => {
         }
     }
 };
+
+// @desc Update habit
+// @route PUT /:id
+
+export const updateHabit = async (req: Request, res: Response) => {
+    const habitId = req.params.id;
+    const { title, frequency } = req.body;
+
+    const habit = await habitService.updateHabit(habitId, title, frequency);
+
+    res.status(200).json(habit);
+    
+    try {
+    } catch (error: any) {
+        if (error.message) {
+            return res.status(error.status).json({
+                message: error.message,
+            });
+        }
+    }
+};
+
+
+// @desc Delete habit
+// @route DELETE /:id
+
+export const deleteHabit = async (req: HabitRequest, res: Response, next: NextFunction) => {
+    const userId = req.user?.id
+    const habitId = req.params.id
+
+    try {
+        const habitDeleteConfirmation = await habitService.deleteHabit(userId!, habitId)
+
+        res.status(200).json({message: habitDeleteConfirmation})
+
+    } catch (error) {
+        next(error)
+    }
+}

@@ -1,6 +1,6 @@
 import { Frequency } from "@prisma/client";
 import { prisma } from "../prisma";
-import { badRequest, notFound } from "../utils/api-error";
+import { badRequest, notFound, unauthorized } from "../utils/api-error";
 import { isSameDay } from "date-fns";
 
 // @return Created habit object
@@ -96,7 +96,7 @@ export const getHabitById = async (habitId: string) => {
 
     const today = new Date();
     const lastLog = habit.HabitLog[0];
-    
+
     return {
         id: habit.id,
         title: habit.title,
@@ -108,3 +108,59 @@ export const getHabitById = async (habitId: string) => {
             : false,
     };
 };
+
+
+// @return Updated habit object
+
+export const updateHabit = async (habitId: string, title: string, frequency: Frequency) => {
+    if(!habitId) {
+        throw badRequest("Habit id is required")
+    }
+
+    const updatedHabit = await prisma.habit.update({
+        where: {
+            id: habitId
+        },
+        data: {
+            title,
+            frequency
+        }
+    })
+
+    return updatedHabit
+}
+
+// @return Delete habit confirmation
+
+export const deleteHabit = async (userId: number, habitId: string) => {
+    if(!habitId) { 
+        throw badRequest("Habit id is required")
+    }
+
+    if(!userId) { 
+        throw badRequest("User id is required")
+    }
+
+    const habit = await prisma.habit.findUnique({
+        where: {
+            id: habitId,
+            userId
+        }
+    })
+
+    if(!habit) {
+        throw unauthorized("Unauthorized")
+    }
+
+    const deletedHabit = await prisma.habit.deleteMany({
+        where: {
+            id: habitId
+        }
+    })
+
+    if(deletedHabit.count === 0) {
+        throw notFound("Habit not found")
+    }
+
+    return "Habit deleted!"
+}
