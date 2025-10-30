@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String  @unique
+  password  String
+  habits    Habit[]
+}
+
+model Habit {
+  id          String     @id @default(cuid())
+  title       String
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+  frequency   Frequency  @default(DAILY)
+  streakCount Int        @default(0)
+  Reminder    Reminder[]
+  HabitLog    HabitLog[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model HabitLog {
+  id        String   @id @default(cuid())
+  date      DateTime @default(now())
+  completed Boolean  @default(false)
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id])
+}
+
+model Reminder {
+  id      String  @id @default(cuid())
+  time    String
+  message String?
+  habitId String
+  habit   Habit   @relation(fields: [habitId], references: [id])
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+}
