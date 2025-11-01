@@ -42,11 +42,15 @@ model HabitLog {
 model Reminder {
   id      String  @id @default(cuid())
   time    String
-  message String?
+  timezone String
+  triggerAtUtc DateTime
+  recurring Boolean @default(false)
+  message String
   userId Int
   user User @relation(fields: [userId], references: [id])
-  habitId String
-  habit   Habit   @relation(fields: [habitId], references: [id])
+  habitId String?
+  habit   Habit?   @relation(fields: [habitId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 model Notification {
@@ -54,8 +58,8 @@ model Notification {
   message String
   userId Int
   user User @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
   read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 enum Frequency {
