@@ -8,27 +8,28 @@ datasource db {
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
-  firstName String
-  lastName  String
-  email     String  @unique
-  password  String
-  habits    Habit[]
-  reminders Reminder[]
+  id            Int            @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  email         String         @unique
+  password      String
+  habits        Habit[]
+  reminders     Reminder[]
   notifications Notification[]
 }
 
 model Habit {
-  id          String     @id @default(cuid())
-  title       String
-  userId      Int
-  user        User       @relation(fields: [userId], references: [id])
-  frequency   Frequency  @default(DAILY)
-  streakCount Int        @default(0)
+  id           String         @id @default(cuid())
+  title        String
+  userId       Int
+  user         User           @relation(fields: [userId], references: [id])
+  frequency    Frequency      @default(DAILY)
+  streakCount  Int            @default(0)
   reminders    Reminder[]
   habitLogs    HabitLog[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Notification Notification[]
 }
 
 model HabitLog {
@@ -40,24 +41,27 @@ model HabitLog {
 }
 
 model Reminder {
-  id      String  @id @default(cuid())
-  time    String
-  timezone String
+  id           String   @id @default(cuid())
+  time         String
+  timezone     String
   triggerAtUtc DateTime
-  recurring Boolean @default(false)
-  message String
-  userId Int
-  user User @relation(fields: [userId], references: [id])
-  habitId String?
-  habit   Habit?   @relation(fields: [habitId], references: [id])
-  createdAt DateTime @default(now())
+  recurring    Boolean  @default(false)
+  message      String
+  active       Boolean  @default(true)
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+  habitId      String?
+  habit        Habit?   @relation(fields: [habitId], references: [id])
+  createdAt    DateTime @default(now())
 }
 
 model Notification {
-  id String @id @default(cuid())
-  message String
-  userId Int
-  user User @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
+  message   String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  habitId   String?
+  habit     Habit?    @relation(fields: [habitId], references: [id])
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }

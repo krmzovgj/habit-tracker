@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { errorHandler } from "./middlware/error-handler.middleware";
+import "./jobs/reminder.job"
 import authRouter from "./routes/auth.route";
 import userRouter from "./routes/user.route";
 import habitRouter from "./routes/habit.route";
@@ -24,6 +25,7 @@ app.use("/habit", habitRouter);
 app.use("/habit-log", habitLogRouter)
 app.use("/reminder", reminderRouter)
 app.use(errorHandler);
+
 
 app.listen(PORT, () => {
     console.log(`Server is listening on http://localhost:${PORT}`);
