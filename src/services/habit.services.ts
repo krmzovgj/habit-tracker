@@ -45,7 +45,7 @@ export const getHabits = async (userId: number) => {
             userId,
         },
         include: {
-            HabitLog: {
+            habitLogs: {
                 orderBy: { date: "desc" },
                 take: 1,
             },
@@ -55,7 +55,7 @@ export const getHabits = async (userId: number) => {
     const today = new Date();
 
     const habits = allHabits.map((habit) => {
-        const lastLog = habit.HabitLog[0];
+        const lastLog = habit.habitLogs[0];
         return {
             id: habit.id,
             title: habit.title,
@@ -83,7 +83,7 @@ export const getHabitById = async (habitId: string) => {
             id: habitId,
         },
         include: {
-            HabitLog: {
+            habitLogs: {
                 orderBy: { date: "desc" },
                 take: 1,
             },
@@ -95,7 +95,7 @@ export const getHabitById = async (habitId: string) => {
     }
 
     const today = new Date();
-    const lastLog = habit.HabitLog[0];
+    const lastLog = habit.habitLogs[0];
 
     return {
         id: habit.id,
