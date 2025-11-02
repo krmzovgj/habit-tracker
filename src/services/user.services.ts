@@ -1,3 +1,4 @@
+import { io } from "../index";
 import { prisma } from "../prisma";
 import { badRequest, notFound } from "../utils/api-error";
 
@@ -53,6 +54,8 @@ export const updateUser = async (
     if(!user) {
         throw notFound("User not found")
     }
+
+    io.to(userId.toString()).emit("userUpdated", user)
 
     return user
 };

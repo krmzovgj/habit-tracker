@@ -1,6 +1,7 @@
 import { prisma } from "../prisma";
 import { badRequest } from "../utils/api-error";
 import moment from "moment-timezone";
+import { io } from "../index";
 
 // @return Created reminder object
 
@@ -47,9 +48,11 @@ export const createReminder = async (
             recurring,
             triggerAtUtc,
             userId,
-            habitId
+            habitId,
         },
     });
-    
-    return reminder
+
+    io.to(userId.toString()).emit("newReminder", reminder)
+
+    return reminder;
 };
