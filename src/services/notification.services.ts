@@ -15,5 +15,5 @@ export const createNotification = async (reminder: Reminder) => {
         }
     })
 
-    io.to(reminder.userId.toString()).emit("newNotification", {notification, message: "Notification recieved"});
+    io.to(reminder.userId.toString()).emit("newNotification", notification);
 }

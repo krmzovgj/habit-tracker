@@ -25,7 +25,7 @@ model Habit {
   user         User           @relation(fields: [userId], references: [id])
   frequency    Frequency      @default(DAILY)
   streakCount  Int            @default(0)
-  reminders    Reminder[]
+  reminders    Reminder[] 
   habitLogs    HabitLog[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -37,7 +37,7 @@ model HabitLog {
   date      DateTime @default(now())
   completed Boolean  @default(false)
   habitId   String
-  habit     Habit    @relation(fields: [habitId], references: [id])
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
 }
 
 model Reminder {
@@ -51,7 +51,7 @@ model Reminder {
   userId       Int
   user         User     @relation(fields: [userId], references: [id])
   habitId      String?
-  habit        Habit?   @relation(fields: [habitId], references: [id])
+  habit        Habit?   @relation(fields: [habitId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
 }
 

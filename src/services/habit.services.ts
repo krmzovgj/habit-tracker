@@ -2,6 +2,7 @@ import { Frequency } from "@prisma/client";
 import { prisma } from "../prisma";
 import { badRequest, notFound, unauthorized } from "../utils/api-error";
 import { isSameDay } from "date-fns";
+import { io } from "../index";
 
 // @return Created habit object
 
@@ -29,6 +30,8 @@ export const createHabit = async (
             userId,
         },
     });
+
+    io.to(userId.toString()).emit("newHabit", habit)
 
     return habit;
 };
@@ -127,6 +130,8 @@ export const updateHabit = async (habitId: string, title: string, frequency: Fre
         }
     })
 
+    io.to(updatedHabit.userId.toString()).emit("habitUpdated", updatedHabit)
+
     return updatedHabit
 }
 
@@ -161,6 +166,8 @@ export const deleteHabit = async (userId: number, habitId: string) => {
     if(deletedHabit.count === 0) {
         throw notFound("Habit not found")
     }
+
+    io.to(userId.toString()).emit("habitDeleted", {id: habitId})
 
     return "Habit deleted!"
 }

@@ -16,7 +16,7 @@ export const createUser = async (
         throw badRequest("Email and password are required");
     }
 
-    const existing = prisma.user.findUnique({
+    const existing = await prisma.user.findUnique({
         where: { email },
     });
 
@@ -24,7 +24,7 @@ export const createUser = async (
         throw badRequest("User with that email already exists");
     }
 
-    const hashed = await bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
         data: {
@@ -60,7 +60,7 @@ export const signIn = async (email: string, password: string) => {
         throw badRequest("Invalid credentials");
     }
 
-    const valid = bcrypt.compare(password, user.password);
+    const valid = await bcrypt.compare(password, user.password);
 
     if (!valid) {
         throw badRequest("Invalid credentials");

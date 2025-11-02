@@ -1,3 +1,4 @@
+import { io } from "../index";
 import { prisma } from "../prisma";
 import { badRequest, notFound } from "../utils/api-error";
 import { isSameDay, isSameMonth, isSameWeek, subWeeks } from "date-fns";
@@ -14,7 +15,7 @@ export const completeHabit = async (habitId: string, completed: boolean) => {
             id: habitId,
         },
         include: {
-            HabitLog: {
+            habitLogs: {
                 orderBy: { date: "desc" },
                 take: 1,
             },
@@ -26,7 +27,7 @@ export const completeHabit = async (habitId: string, completed: boolean) => {
     }
 
     const today = new Date();
-    const lastLog = habit.HabitLog[0];
+    const lastLog = habit.habitLogs[0];
 
     switch (habit.frequency) {
         case "DAILY":
@@ -71,7 +72,7 @@ export const completeHabit = async (habitId: string, completed: boolean) => {
         }
     }
 
-    await prisma.habit.update({
+    const upatedHabit = await prisma.habit.update({
         where: {
             id: habitId,
         },
@@ -79,6 +80,8 @@ export const completeHabit = async (habitId: string, completed: boolean) => {
             streakCount: streak,
         },
     });
+
+    io.to(habit.userId.toString()).emit("habitCompleted", upatedHabit)
 
     return { message: "Habit completed!", streak };
 };
