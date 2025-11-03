@@ -4,7 +4,7 @@ import { verifyToken } from "../middlware/auth.middleware"
 
 const router = express.Router()
 
-router.get("/:id", verifyToken, userController.getUserById)
+router.get("/me", verifyToken, userController.getCurrentUser)
 router.put("/:id", verifyToken, userController.updateUser)
 router.delete("/:id", verifyToken, userController.deleteUser)
 

@@ -28,7 +28,7 @@ io.on("connection", async (socket) => {
     socket.on("joinRoom", (user) => {
         const userId = Number(user.id)
         socket.join(userId.toString());
-        console.log(`User ${userId} joined room`);
+        console.log(`User with id ${userId} joined room`);
     });
 });
 

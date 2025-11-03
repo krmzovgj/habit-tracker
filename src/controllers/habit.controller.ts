@@ -16,7 +16,7 @@ export const createHabit = async (req: HabitRequest, res: Response) => {
 
     try {
         const habit = await habitService.createHabit(userId!, title, frequency);
-        res.status(201).json({ habit });
+        res.status(201).json(habit);
     } catch (error: any) {
         if (error.message) {
             return res.status(error.status).json({

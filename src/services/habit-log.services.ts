@@ -5,7 +5,7 @@ import { isSameDay, isSameMonth, isSameWeek, subWeeks } from "date-fns";
 
 // @return Created habit log
 
-export const completeHabit = async (habitId: string, completed: boolean) => {
+export const completeHabit = async (habitId: string) => {
     if (!habitId) {
         throw badRequest("Habit id is required");
     }
@@ -34,15 +34,20 @@ export const completeHabit = async (habitId: string, completed: boolean) => {
             if (lastLog && isSameDay(lastLog.date, today)) {
                 throw badRequest("Habit already completed today");
             }
+            break;
         case "WEEKLY":
-            if (lastLog && isSameMonth(lastLog.date, today)) {
+            if (
+                lastLog &&
+                isSameWeek(lastLog.date, today, { weekStartsOn: 1 })
+            ) {
                 throw badRequest("Habit already completed this week");
             }
+            break
     }
 
     await prisma.habitLog.create({
         data: {
-            completed,
+            completed: true,
             habitId,
         },
     });
@@ -58,6 +63,7 @@ export const completeHabit = async (habitId: string, completed: boolean) => {
             } else {
                 streak = 1;
             }
+            break
         }
         case "WEEKLY": {
             const lastWeek = subWeeks(new Date(), 1);
@@ -69,19 +75,40 @@ export const completeHabit = async (habitId: string, completed: boolean) => {
             } else {
                 streak = 1;
             }
+            break
         }
     }
 
-    const upatedHabit = await prisma.habit.update({
-        where: {
-            id: habitId,
-        },
-        data: {
-            streakCount: streak,
+    const updatedHabit = await prisma.habit.update({
+        where: { id: habitId },
+        data: { streakCount: streak },
+        include: {
+            habitLogs: {
+                orderBy: { date: "desc" },
+                take: 1,
+            },
         },
     });
 
-    io.to(habit.userId.toString()).emit("habitCompleted", upatedHabit)
+    const latestLog = updatedHabit.habitLogs[0];
+
+    const completedHabit = {
+        id: updatedHabit.id,
+        title: updatedHabit.title,
+        frequency: updatedHabit.frequency,
+        streakCount: updatedHabit.streakCount,
+        lastCompletedDate: latestLog?.date || null,
+        completed:
+            latestLog &&
+            (updatedHabit.frequency === "DAILY"
+                ? new Date(latestLog.date).toLocaleDateString() ===
+                  today.toLocaleDateString()
+                : isSameWeek(new Date(latestLog.date), today, {
+                      weekStartsOn: 1,
+                  })),
+    };
+
+    io.to(habit.userId.toString()).emit("habitCompleted", completedHabit);
 
     return { message: "Habit completed!", streak };
 };

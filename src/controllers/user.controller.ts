@@ -8,15 +8,15 @@ interface UserRequest extends Request {
 }
 
 // @desc Get user by id
-// @route GET /:id
+// @route GET /me
 
-export const getUserById = async (req: Request, res: Response) => {
-    const userId = parseInt(req.params.id);
+export const getCurrentUser = async (req: UserRequest, res: Response) => {
+    const userId = req.user?.id!;
 
     try {
         const user = await userService.getUserById(userId);
 
-        res.status(200).json({ user });
+        res.status(200).json(user);
     } catch (error: any) {
         if (error.message) {
             return res.status(error.status).json({
@@ -41,7 +41,7 @@ export const updateUser = async (req: Request, res: Response) => {
             email
         );
 
-        res.status(200).json({ user });
+        res.status(200).json(user);
     } catch (error: any) {
         if (error.message) {
             return res.status(error.status).json({ message: error.message });
