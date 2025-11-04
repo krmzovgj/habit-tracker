@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import compression from "compression";
 import { errorHandler } from "./middlware/error-handler.middleware";
 import "./jobs/reminder.job";
 import authRouter from "./routes/auth.route";
@@ -12,10 +13,15 @@ import reminderRouter from "./routes/reminder.route";
 
 const PORT = process.env.PORT || 8080;
 const app = express();
-const server = http.createServer(app);
 
 app.use(cors());
+app.use(compression())
 app.use(express.json());
+
+
+const server = http.createServer(app);
+server.keepAliveTimeout = 65000; 
+server.headersTimeout = 66000; 
 
 export const io = new Server(server, {
     cors: {

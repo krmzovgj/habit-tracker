@@ -15,7 +15,7 @@ export const createAccount = async (req: Request, res: Response) => {
             password
         );
 
-        res.status(201).json({ user });
+        res.status(201).json(user);
     } catch (error: any) {
         if (error.message) {
             return res.status(error.status).json({ message: error.message });
@@ -32,7 +32,7 @@ export const signIn = async (req: Request, res: Response) => {
     try {
         const token = await authService.signIn(email, password);
 
-        res.status(200).json({ token });
+        res.status(200).json({token});
     } catch (error: any) {
         if (error.message) {
             return res.status(error.status).json({ message: error.message });
