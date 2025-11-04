@@ -20,7 +20,7 @@ export const createUser = async (
         where: { email },
     });
 
-    if (!existing) {
+    if (existing) {
         throw badRequest("User with that email already exists");
     }
 
