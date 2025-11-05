@@ -97,6 +97,7 @@ export const completeHabit = async (habitId: string) => {
         title: updatedHabit.title,
         frequency: updatedHabit.frequency,
         streakCount: updatedHabit.streakCount,
+        color: updatedHabit.color,
         lastCompletedDate: latestLog?.date || null,
         completed:
             latestLog &&

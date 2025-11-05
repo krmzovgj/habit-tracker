@@ -3,13 +3,15 @@ import { prisma } from "../prisma";
 import { badRequest, notFound, unauthorized } from "../utils/api-error";
 import { isSameDay, isSameWeek } from "date-fns";
 import { io } from "../index";
+import { mapHabitWithCompletion } from "../utils/mab-habit-with-completion";
 
 // @return Created habit object
 
 export const createHabit = async (
     userId: number,
     title: string,
-    frequency: Frequency
+    frequency: Frequency,
+    color: string
 ) => {
     if (!userId) {
         throw badRequest("User id is required");
@@ -27,6 +29,7 @@ export const createHabit = async (
         data: {
             title,
             frequency,
+            color,
             userId,
         },
     });
@@ -55,29 +58,7 @@ export const getHabits = async (userId: number) => {
         },
     });
 
-    const today = new Date();
-    const habits = allHabits.map((habit) => {
-        const lastLog = habit.habitLogs[0];
-        const completed =
-            lastLog &&
-            (habit.frequency === "DAILY"
-                ? new Date(lastLog.date).toLocaleDateString() ===
-                  today.toLocaleDateString()
-                : isSameWeek(new Date(lastLog.date), today, {
-                      weekStartsOn: 1,
-                  }));
-
-        return {
-            id: habit.id,
-            title: habit.title,
-            frequency: habit.frequency,
-            streakCount: habit.streakCount,
-            lastCompletedDate: lastLog?.date || null,
-            completed,
-        };
-    });
-
-    return habits;
+    return allHabits.map(mapHabitWithCompletion);
 };
 
 // @return Habit object by id
@@ -103,19 +84,7 @@ export const getHabitById = async (habitId: string) => {
         throw notFound("Habit not found");
     }
 
-    const today = new Date();
-    const lastLog = habit.habitLogs[0];
-
-    return {
-        id: habit.id,
-        title: habit.title,
-        frequency: habit.frequency,
-        streakCount: habit.streakCount,
-        lastCompletedDate: lastLog?.date || null,
-        completedToday: lastLog
-            ? isSameDay(new Date(lastLog.date), today)
-            : false,
-    };
+    return mapHabitWithCompletion(habit);
 };
 
 // @return Updated habit object
@@ -123,25 +92,30 @@ export const getHabitById = async (habitId: string) => {
 export const updateHabit = async (
     habitId: string,
     title: string,
-    frequency: Frequency
+    frequency: Frequency,
+    color: string
 ) => {
-    if (!habitId) {
-        throw badRequest("Habit id is required");
-    }
+    if (!habitId) throw badRequest("Habit id is required");
 
     const updatedHabit = await prisma.habit.update({
-        where: {
-            id: habitId,
-        },
-        data: {
-            title,
-            frequency,
+        where: { id: habitId },
+        data: { title, frequency, color },
+        include: {
+            habitLogs: {
+                orderBy: { date: "desc" },
+                take: 1,
+            },
         },
     });
 
-    io.to(updatedHabit.userId.toString()).emit("habitUpdated", updatedHabit);
+    const habitWithCompletion = mapHabitWithCompletion(updatedHabit);
 
-    return updatedHabit;
+    io.to(updatedHabit.userId.toString()).emit(
+        "habitUpdated",
+        habitWithCompletion
+    );
+
+    return habitWithCompletion;
 };
 
 // @return Delete habit confirmation

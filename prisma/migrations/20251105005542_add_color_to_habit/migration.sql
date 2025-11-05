@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Habit" ADD COLUMN     "color" TEXT NOT NULL DEFAULT 'FF8C00';

@@ -12,10 +12,10 @@ interface HabitRequest extends Request {
 
 export const createHabit = async (req: HabitRequest, res: Response) => {
     const userId = req.user?.id;
-    const { title, frequency } = req.body;
+    const { title, frequency, color } = req.body;
 
     try {
-        const habit = await habitService.createHabit(userId!, title, frequency);
+        const habit = await habitService.createHabit(userId!, title, frequency, color);
         res.status(201).json(habit);
     } catch (error: any) {
         if (error.message) {
@@ -69,9 +69,9 @@ export const getHabitById = async (req: Request, res: Response) => {
 
 export const updateHabit = async (req: Request, res: Response) => {
     const habitId = req.params.id;
-    const { title, frequency } = req.body;
+    const { title, frequency, color } = req.body;
 
-    const habit = await habitService.updateHabit(habitId, title, frequency);
+    const habit = await habitService.updateHabit(habitId, title, frequency, color);
 
     res.status(200).json(habit);
     
